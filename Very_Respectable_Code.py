@@ -106,12 +106,6 @@ top_movies_index = movies_ind.index[top['movieId']].values
 # In[12]:
 
 
-top_movies_index
-
-
-# In[13]:
-
-
 # inputs user rating into large array (9,000+ count) at appropriate indexes
 for i in range(0,10):
     user_ratings[top_movies_index[i]] = user_input[i]
@@ -119,24 +113,21 @@ for i in range(0,10):
 
 # # NMF Modeling
 
-# In[14]:
+# In[13]:
 
-
-PATH4 = "movies.csv"
-movies_ind = pd.read_csv(PATH4)
 
 ratings = ratings.fillna(0)
 ratings = ratings["rating"]
 ratings = ratings.transpose()
 
 
-# In[15]:
+# In[14]:
 
 
 ratings.head(2)
 
 
-# In[16]:
+# In[15]:
 
 
 R = pd.DataFrame(ratings)
@@ -148,71 +139,68 @@ P = model.components_  # Movie feature
 Q = model.transform(R)  # User features
 
 
-# In[17]:
+# In[16]:
 
 
 query = user_ratings.reshape(1,-1)
 
 
-# In[18]:
+# In[17]:
 
 
 t=model.transform(query)
 
 
-# In[19]:
+# In[18]:
 
 
+# prediction movie ratings of input user
 outcome = np.dot(t,P)
 
 
-# In[20]:
+# In[19]:
 
 
 outcome=pd.DataFrame(outcome)
 
 
-# In[21]:
+# In[20]:
 
 
 outcome = outcome.transpose()
 
 
-# In[22]:
+# In[21]:
 
 
 outcome['movieId'] = movies_ind['movieId']
 
 
-# In[23]:
+# In[22]:
 
 
 outcome = outcome.rename(columns={0:'rating'})
 
 
-# In[24]:
+# In[23]:
 
 
-outcome
-
-
-# In[25]:
-
-
+# top 100 ratings from predictions list
 top = outcome.sort_values(by='rating',ascending=False).head(100)
 
 
 # # Selecting a Movie
 
-# In[26]:
+# In[24]:
 
 
+# collects titles of the top movie predictions
 top_movie_recs = movies_ind.loc[top['movieId']]['title'].values
 
 
 # # Selecting a Movie with Genre Input
 
-# In[27]:
+# In[25]:
 
 
 #importing genres
@@ -220,25 +208,25 @@ PATHG = "movie_genres_years.csv"
 movie_genres = pd.read_csv(PATHG)
 
 
-# In[28]:
+# In[26]:
 
 
 # creates list of genres
 genres = movie_genres.columns.values[3:22]
 
 
-# In[29]:
+# In[27]:
 
 
 # dictionary with keys equal to genre
-c = {}
+b,c = {}, {}
 for x in genres:
     key = x
     value = ''
-    c[key] = value 
+    b[key],c[key] = value, value
 
 
-# In[30]:
+# In[28]:
 
 
 # fills keys with list of movies that belong to respective genre
@@ -250,18 +238,7 @@ for x in genres:
     c[x] = li
 
 
-# In[31]:
-
-
-# dictionary with keys equal to genre
-b = {}
-for x in genres:
-    key = x
-    value = ''
-    b[key] = value 
-
-
-# In[32]:
+# In[29]:
 
 
 #fills keys with random choice in the list of films within a genre
@@ -272,26 +249,26 @@ for x in genres:
         b[x] = ""
 
 
-# In[33]:
+# In[30]:
 
 
 # add an option for not choosing a genre
 genres_for_q = np.append(genres, 'none')
 
 
-# In[34]:
+# In[31]:
 
 
 from fuzzywuzzy import process
 
 
-# In[35]:
+# In[32]:
 
 
 genre_answer = process.extractOne(input("What genre of film would you like to watch?"),genres_for_q)
 
 
-# In[41]:
+# In[33]:
 
 
 #picks a top movie of the selected genre
