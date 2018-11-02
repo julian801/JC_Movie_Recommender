@@ -3,7 +3,7 @@
 
 # ## NMF = Not Monday night Football !
 
-# In[1]:
+# In[100]:
 
 
 import pandas as pd
@@ -24,7 +24,7 @@ import csv
 
 # # User Input
 
-# In[2]:
+# In[101]:
 
 
 #importing ratings and movies csv files
@@ -33,14 +33,14 @@ PATH3 = "movies.csv"
 ratings, movies_ind = pd.read_csv(PATH2), pd.read_csv(PATH3)
 
 
-# In[3]:
+# In[102]:
 
 
 # create an empty array the length of number of movies in system
 user_ratings = np.zeros(9724)
 
 
-# In[4]:
+# In[103]:
 
 
 #format ratings dataframe
@@ -49,26 +49,26 @@ ratings.set_index(['userId','movieId'], inplace=True)
 ratings = ratings.unstack(0)
 
 
-# In[5]:
+# In[104]:
 
 
 ratings_count = ratings.count(axis=1) #count the number of ratings for each movie as a measure of popularity
 top = pd.DataFrame(ratings_count.sort_values(ascending = False).head(10)) #create a dataframe of the top 20 most popular movies
 
 
-# In[6]:
+# In[105]:
 
 
 top.reset_index(inplace=True)
 
 
-# In[7]:
+# In[106]:
 
 
 movies_ind.set_index('movieId',inplace=True)
 
 
-# In[8]:
+# In[107]:
 
 
 top_movies_g = movies_ind.loc[top['movieId']]['title'].values
@@ -77,35 +77,39 @@ top_movies_g = movies_ind.loc[top['movieId']]['title'].values
 # ## Of the following movies, rate all that you have seen on a scale of 1-5. 
 # ## If you have not seen a movie, rate 0.
 
-# In[9]:
+# In[139]:
 
 
 #creates a list of ratings for the prompted movies
 user_input = []
 for i in range(0,10):
     answer = int(input("How would you rate " + str(top_movies_g[i])))
+    if answer > 5:
+        answer = 5
+    elif answer < 0:
+        answer = 0
     user_input.append(answer)
 
 
-# In[10]:
+# In[109]:
 
 
 movies_ind.reset_index(inplace=True)
 
 
-# In[11]:
+# In[110]:
 
 
 top_movies_index = movies_ind.index[top['movieId']].values
 
 
-# In[12]:
+# In[111]:
 
 
 top_movies_index
 
 
-# In[13]:
+# In[112]:
 
 
 # inputs user rating into large array (9,000+ count) at appropriate indexes
@@ -115,7 +119,7 @@ for i in range(0,10):
 
 # # NMF Modeling
 
-# In[14]:
+# In[113]:
 
 
 PATH4 = "movies.csv"
@@ -126,13 +130,13 @@ ratings = ratings["rating"]
 ratings = ratings.transpose()
 
 
-# In[15]:
+# In[114]:
 
 
 ratings.head(2)
 
 
-# In[16]:
+# In[115]:
 
 
 R = pd.DataFrame(ratings)
@@ -144,78 +148,71 @@ P = model.components_  # Movie feature
 Q = model.transform(R)  # User features
 
 
-# In[17]:
+# In[116]:
 
 
 query = user_ratings.reshape(1,-1)
 
 
-# In[18]:
+# In[117]:
 
 
 t=model.transform(query)
 
 
-# In[19]:
+# In[118]:
 
 
 outcome = np.dot(t,P)
 
 
-# In[20]:
+# In[119]:
 
 
 outcome=pd.DataFrame(outcome)
 
 
-# In[21]:
+# In[120]:
 
 
 outcome = outcome.transpose()
 
 
-# In[22]:
+# In[121]:
 
 
 outcome['movieId'] = movies_ind['movieId']
 
 
-# In[23]:
+# In[122]:
 
 
 outcome = outcome.rename(columns={0:'rating'})
 
 
-# In[24]:
+# In[123]:
 
 
 outcome
 
 
-# In[60]:
+# In[124]:
 
 
 top = outcome.sort_values(by='rating',ascending=False).head(100)
 
 
-# # Selecting a Movie with no Genre Input
+# # Selecting a Movie
 
-# In[61]:
+# In[125]:
 
 
 top_movie_recs = movies_ind.loc[top['movieId']]['title'].values
 
 
-# In[62]:
-
-
-Select = top_movie_recs[randint(0, 4)]
-Select
-
-
 # # Selecting a Movie with Genre Input
 
-# In[63]:
+# In[126]:
 
 
 #importing genres
@@ -223,7 +220,7 @@ PATHG = "movie_genres_years.csv"
 movie_genres = pd.read_csv(PATHG)
 
 
-# In[64]:
+# In[127]:
 
 
 # list of all movie Ids belonging to certain genres
@@ -248,13 +245,13 @@ western_movies= list(movie_genres.loc[movie_genres['Genre_Western'] == 1]['movie
 noir_movies= list(movie_genres.loc[movie_genres['Genre_Film-Noir'] == 1]['movieId'])
 
 
-# In[65]:
+# In[128]:
 
 
 genres = movie_genres.columns.values[3:22]
 
 
-# In[66]:
+# In[129]:
 
 
 a = {}
@@ -264,7 +261,7 @@ for x in genres:
     a[key] = value 
 
 
-# In[67]:
+# In[130]:
 
 
 ad = []
@@ -366,7 +363,7 @@ for s in top['movieId']:
         
 
 
-# In[76]:
+# In[131]:
 
 
 adventure_rec = a['Genre_Adventure'][randint(0, len(a['Genre_Adventure'])-1)][0]
@@ -389,19 +386,25 @@ western_rec = a['Genre_Western'][randint(0, len(a['Genre_Western'])-1)][0]
 noir_rec = a['Genre_Film-Noir'][randint(0, len(a['Genre_Film-Noir'])-1)][0]
 
 
-# In[69]:
+# In[132]:
+
+
+genres = np.append(genres, 'none')
+
+
+# In[133]:
 
 
 from fuzzywuzzy import process
 
 
-# In[83]:
+# In[134]:
 
 
 genre_answer = process.extractOne(input("What genre of film would you like to watch?"),genres)
 
 
-# In[84]:
+# In[135]:
 
 
 if genre_answer[0] == 'Genre_Adventure':
@@ -489,4 +492,7 @@ if genre_answer[0] == 'Genre_Film-Noir':
         print('No film-noir recommendations')
     else:
         print('We recommend ' + noir_rec)
+if genre_answer[0] == 'none':
+    Select = top_movie_recs[randint(0, 4)]
+    print('We recommend ' + Select)
 
